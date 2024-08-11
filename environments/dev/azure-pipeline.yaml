@@ -1,0 +1,34 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  ARM_CLIENT_ID: '$(client-id)'         # To be filled with your Service Principal's Client ID
+  ARM_CLIENT_SECRET: '$(client-secret)' # To be filled with your Service Principal's Client Secret
+  ARM_SUBSCRIPTION_ID: '$(subscription-id)' # To be filled with your Azure Subscription ID
+  ARM_TENANT_ID: '$(tenant-id)'         # To be filled with your Azure Tenant ID
+
+steps:
+- task: UseAzureCLI@1
+  inputs:
+    azureSubscription: 'your-azure-subscription'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "##vso[task.setvariable variable=ARM_CLIENT_ID]$ARM_CLIENT_ID"
+      echo "##vso[task.setvariable variable=ARM_CLIENT_SECRET]$ARM_CLIENT_SECRET"
+      echo "##vso[task.setvariable variable=ARM_TENANT_ID]$ARM_TENANT_ID"
+      echo "##vso[task.setvariable variable=ARM_SUBSCRIPTION_ID]$ARM_SUBSCRIPTION_ID"
+
+- script: |
+    az login --service-principal -u $(ARM_CLIENT_ID) -p $(ARM_CLIENT_SECRET) --tenant $(ARM_TENANT_ID)
+    az account set --subscription $(ARM_SUBSCRIPTION_ID)
+  displayName: 'Azure Login'
+
+- script: |
+    cd environments/dev  # Navigate to your environment directory
+    terragrunt init      # Initialize Terragrunt
+    terragrunt apply -auto-approve  # Apply the configuration
+  displayName: 'Deploy with Terragrunt'
