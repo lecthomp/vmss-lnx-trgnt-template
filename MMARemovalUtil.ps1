@@ -70,6 +70,10 @@ function Process-VMsInParallel {
             $vm
         )
 
+        # Ensure the Remove-MicrosoftMonitoringAgent function is defined in the current context
+        using module $using:MyScriptModule
+
+        # Call the function
         Remove-MicrosoftMonitoringAgent -subscriptionId $vm.SubscriptionId `
                                         -resourceGroupName $vm.ResourceGroupName `
                                         -vmName $vm.Name `
