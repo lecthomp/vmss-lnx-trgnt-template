@@ -19,26 +19,18 @@ $policyDetails = @()
 foreach ($policy in $initiative.Properties.PolicyDefinitions) {
     
     # Get the full policy definition using the policy ID
+    Write-Host $policy.PolicyDefinitionId
     $policyDefinition = Get-AzPolicyDefinition -Id $policy.PolicyDefinitionId
-    
+    Write-Host $policyDefinition
     # Extract relevant details
     $policyName = $policyDefinition.Properties.DisplayName
-    $policyVersion = $policyDefinition.Properties.PolicyDefinitionVersion
+    $policyDescription = $policyDefinition.Properties.Description
+    $policyVersion = $policyDefinition.Properties.Metadata.version
     $policyCategory = $policyDefinition.Properties.Metadata.Category
-    $policyEffect = $policyDefinition.Properties.PolicyRule.If.Effect
+    $policyEffect = $policyDefinition.Properties.Parameters.effect.allowedValues
+    $policyDefaultEffect = $policyDefinition.Properties.Parameters.effect.defaultValue
+    $policyParameter = $policyDefinition.Properties.Parameters.effect.metadata.description
     
-    # Extract policy parameters
-    $parameters = @()
-    if ($policyDefinition.Properties.Parameters) {
-        foreach ($param in $policyDefinition.Properties.Parameters.Keys) {
-            $paramDetails = @{
-                Name = $param
-                Type = $policyDefinition.Properties.Parameters[$param].Type
-                DefaultValue = $policyDefinition.Properties.Parameters[$param].DefaultValue
-            }
-            $parameters += $paramDetails
-        }
-    }
 
     # Store the collected data
     $policyDetails += [PSCustomObject]@{
@@ -46,7 +38,8 @@ foreach ($policy in $initiative.Properties.PolicyDefinitions) {
         Version    = $policyVersion
         Category   = $policyCategory
         Effect     = $policyEffect
-        Parameters = $parameters
+        DefaultEffect = $policyDefaultEffect
+        Parameter = $policyParameter
     }
 }
 
