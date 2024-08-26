@@ -1,11 +1,11 @@
 # Ensure you're logged in to Azure
 Connect-AzAccount
 
-# Set the Policy Initiative name or ID
-$initiativeName = "NIST SP 800-53 Rev 5"
+# Set the Policy Initiative Definition ID
+$initiativeId = "/providers/Microsoft.Authorization/policySetDefinitions/179d1daa-458f-4e47-8086-2a68d0d6c38f"
 
-# Get the Policy Initiative details
-$initiative = Get-AzPolicySetDefinition | Where-Object {$_.Properties.DisplayName -eq $initiativeName}
+# Retrieve the Policy Initiative using the Definition ID
+$initiative = Get-AzPolicySetDefinition -Id $initiativeId
 
 if ($initiative -eq $null) {
     Write-Host "Policy Initiative not found!"
