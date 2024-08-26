@@ -47,4 +47,4 @@ foreach ($policy in $initiative.Properties.PolicyDefinitions) {
 $policyDetails | Format-Table -AutoSize
 
 # Optional: Export to CSV if needed
-# $policyDetails | Export-Csv -Path "NIST_SP_800-53_Policies.csv" -NoTypeInformation
+ $policyDetails | Export-Csv -Path "NIST_SP_800-53_Policies.csv" -NoTypeInformation
