@@ -2,7 +2,7 @@
 Connect-AzAccount
 
 # Set the Policy Initiative Definition ID
-$initiativeId = "/providers/Microsoft.Authorization/policySetDefinitions/c047ea8e-9c78-49b2-958b-37e56d291a44"
+$initiativeId = "/providers/Microsoft.Authorization/policySetDefinitions/c3f5c4d9-9a1d-4a99-85c0-7f93e384d5c5"
 
 # Retrieve the Policy Initiative using the Definition ID
 $initiative = Get-AzPolicySetDefinition -Id $initiativeId
