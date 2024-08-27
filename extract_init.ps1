@@ -2,7 +2,7 @@
 Connect-AzAccount
 
 # Set the Policy Initiative Definition ID
-$initiativeId = "/providers/Microsoft.Authorization/policySetDefinitions/179d1daa-458f-4e47-8086-2a68d0d6c38f"
+$initiativeId = "/providers/Microsoft.Authorization/policySetDefinitions/c047ea8e-9c78-49b2-958b-37e56d291a44"
 
 # Retrieve the Policy Initiative using the Definition ID
 $initiative = Get-AzPolicySetDefinition -Id $initiativeId
@@ -27,9 +27,10 @@ foreach ($policy in $initiative.Properties.PolicyDefinitions) {
     $policyDescription = $policyDefinition.Properties.Description
     $policyVersion = $policyDefinition.Properties.Metadata.version
     $policyCategory = $policyDefinition.Properties.Metadata.Category
-    $policyEffect = $policyDefinition.Properties.Parameters.effect.allowedValues
+    $policyEffects = $policyDefinition.Properties.Parameters.effect.allowedValues
     $policyDefaultEffect = $policyDefinition.Properties.Parameters.effect.defaultValue
     $policyParameter = $policyDefinition.Properties.Parameters.effect.metadata.description
+    $policyEffectString = $policyEffects -join ","
     
 
     # Store the collected data
@@ -37,7 +38,7 @@ foreach ($policy in $initiative.Properties.PolicyDefinitions) {
         Name       = $policyName
         Version    = $policyVersion
         Category   = $policyCategory
-        Effect     = $policyEffect
+        Effect     = $policyEffectString
         DefaultEffect = $policyDefaultEffect
         Parameter = $policyParameter
     }
