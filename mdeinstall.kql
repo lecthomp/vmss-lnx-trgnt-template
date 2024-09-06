@@ -1,0 +1,19 @@
+resources
+| where type == 'microsoft.compute/virtualmachines'
+| extend resourceId = tolower(id)
+| extend OsType = properties.storageProfile.osDisk.osType
+| join kind = leftouter (resources
+    | where type == 'microsoft.compute/virtualmachines/extensions' and name has 'MDE'
+    | extend resourceId = tolower((split(id, "/extensions"))[0])
+) on resourceId
+| extend state = iff(isnotempty(properties1.provisioningState), "installed", "notInstalled")
+| join kind = leftouter (ResourceContainers
+    | where type =~ 'microsoft.resources/subscriptions'
+    | mv-expand mgAncestors = properties.managementGroupAncestorsChain
+    | extend subscriptionName = name, 
+        mgname = tostring(mgAncestors.name)
+    | project subscriptionId, subscriptionName, mgname) on subscriptionId
+| summarize count_installed = countif(state =="installed"), count_notInstalled = countif(state == "notInstalled") by mgname, tostring(OsType)
+| extend percent_installed = todouble(count_installed) / (count_installed + count_notInstalled) * 100
+| project mgname, OsType, percent_installed, count_installed, count_notInstalled
+| order by ['percent_installed'] asc
