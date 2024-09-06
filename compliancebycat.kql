@@ -1,0 +1,26 @@
+policyresources
+| where type == 'microsoft.policyinsights/policystates'
+| extend complianceState = tostring(properties.complianceState),
+         policyDefinitionId = tolower(tostring(properties.policyDefinitionId)),
+         resourceId = tostring(properties.resourceId),
+         policyAssignmentId = tolower(tostring(properties.policyAssignmentId)),
+         //managementGroup = tostring(split(tolower(properties.policyAssignmentScope),"/")[4])
+         managementGroup = tostring(split(tolower(tostring(properties.managementGroupIds)), ",")[2]) //Hierarchy of MG
+| summarize 
+    compliantCount = countif(complianceState == 'Compliant'),
+    nonCompliantCount = countif(complianceState == 'NonCompliant'),
+    exemptCount = countif(complianceState == 'Exempt'),
+    totalCount = count()
+  by policyDefinitionId, managementGroup
+| extend percentCompliant = (todouble(compliantCount) / todouble(totalCount)) * 100
+| join kind=inner (
+    policyresources
+    | where type == 'microsoft.authorization/policydefinitions'
+    | extend policy_definition_id = tostring(tolower(id)),
+             policy_definition_name = tostring(name),
+             policy_definition_display_name = tostring(properties.displayName),
+             policy_definition_category = tostring(properties.metadata.category)
+    | where policy_definition_display_name contains "CRD" // remove this to see all policies within the environment
+) on $left.policyDefinitionId == $right.policy_definition_id
+| project managementGroup, policy_definition_display_name, policy_definition_category,percentCompliant, compliantCount, nonCompliantCount, exemptCount
+| order by ['policy_definition_category'] asc
